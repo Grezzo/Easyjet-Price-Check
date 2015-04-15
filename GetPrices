@@ -1,0 +1,71 @@
+#! /bin/sh
+
+DEP=LGW
+DES=HER
+
+DD=D/M/YYYY
+DT=HH:MM
+DP=XXX.XX
+
+RD=D/M/YYYY
+RT=HH:MM
+RP=XXX.XX
+
+PAS=2
+
+URL="http://www.easyjet.com/links.mvc?dep=$DEP&dest=$DES&dd=$DD&rd=$RD&apax=$PAS"
+
+curl -s -L -c cookies.txt -o prices.html $URL
+
+rm cookies.txt
+
+DNOWP=$(sed -n "
+/ \{12\}£/{
+ N
+ N
+ N
+ N
+ N
+ /30\/06\/2015 $DT/{
+  s/<\/s.*//
+  s/<\/div><span>//
+  s/<div>//
+  s/ \{12\}£//
+  p
+ }
+}
+" prices.html)
+
+RNOWP=$(sed -n "
+/ \{12\}£/{
+ N
+ N
+ N
+ N
+ N
+ /10\/07\/2015 $RT/{
+  s/<\/s.*//
+  s/<\/div><span>//
+  s/<div>//
+  s/ \{12\}£//
+  p
+ }
+}
+" prices.html)
+
+rm prices.html
+
+DDIFF=$(echo "$DP - $DNOWP" | bc)
+RDIFF=$(echo "$RP - $RNOWP" | bc)
+
+if [[ $(echo "if ($DDIFF > 0) 1 else 0" | bc) -eq 1 ]]; then
+  MESSAGE="Departure flight is £$DDIFF cheaper."
+fi
+
+if [[ $(echo "if ($RDIFF > 0) 1 else 0" | bc) -eq 1 ]]; then
+  MESSAGE="$MESSAGE Return flight is £$RDIFF cheaper."
+fi
+
+if [[ $MESSAGE ]]; then
+  curl --data "apikey=XXXXX&application=EJCheck&event=Price%20Is%20Cheaper!&description=$MESSAGE" https://api.prowlapp.com/publicapi/add
+fi
