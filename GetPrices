@@ -1,7 +1,7 @@
 #! /bin/sh
 
-DEP=LGW
-DES=HER
+DEP=XXX
+DES=XXX
 
 DD=D/M/YYYY
 DT=HH:MM
@@ -11,7 +11,7 @@ RD=D/M/YYYY
 RT=HH:MM
 RP=XXX.XX
 
-PAS=2
+PAS=X
 
 URL="http://www.easyjet.com/links.mvc?dep=$DEP&dest=$DES&dd=$DD&rd=$RD&apax=$PAS"
 
